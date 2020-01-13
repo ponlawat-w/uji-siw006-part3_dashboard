@@ -6,6 +6,25 @@ $(document).ready(() => {
   var ctx = document.getElementById("myAreaChart");
   var myLineChart;
 
+  const getUrlParams = () => {
+    let search = window.location.search;
+    if (!search) {
+      return {};
+    }
+    search = search.substring(1);
+    const obj = {};
+    $.each(search.split('&'), (idx, paramStr) => {
+      const paramStrSplited = paramStr.split('=');
+      if (paramStrSplited.length < 2) {
+        return;
+      }
+
+      obj[decodeURIComponent(paramStrSplited[0])] = decodeURIComponent(paramStrSplited[1]);
+    });
+
+    return obj;
+  };
+
   const createDataset = (stringDataOrArray, label, color) => {
     const data = typeof stringDataOrArray === 'string' ?
       stringDataOrArray.split(';').slice(2).map(x => parseInt(x)) : stringDataOrArray;
@@ -27,7 +46,9 @@ $(document).ready(() => {
   };
 
   const generateCharts = datasets => {
-    const max = Math.max(...datasets.map(d => d.data).flat(), 15);
+    const maxGoal = Math.max(...datasets.map(d => d.data).flat());
+    let max = Math.round(maxGoal * 1.2);
+    max = Math.max(max - (max % 5), maxGoal);
 
     myLineChart = new Chart(ctx, {
       type: 'line',
@@ -73,10 +94,14 @@ $(document).ready(() => {
     });
   };
 
+  const urlParams = getUrlParams();
+
   $.ajax({
-    url: 'http://soccerdatastats.com/services/api.php/records/PARTIDOS?filter=ID,eq,8537974',
+    url: `http://soccerdatastats.com/services/api.php/records/PARTIDOS?filter=ID,eq,${urlParams.id}`,
     dataType: 'json',
     success: json => {
+      $('#team-names').html(`${json.records[0].HOME} - ${json.records[0].AWAY}`);
+
       const datasets = [
         createDataset(json.records[0].goles_home_total_MARCADOS, 'Home', 'rgb(54, 162, 235)'),
         createDataset(json.records[0].goles_away_total_MARCADOS, 'Away', 'rgb(255, 99, 132)')

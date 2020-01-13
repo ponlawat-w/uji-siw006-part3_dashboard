@@ -9,7 +9,8 @@ $(document).ready(function() {
       {data: 'G30_45'},
       {data: 'G45_60'},
       {data: 'G60_75'},
-      {data: 'G75_90'}
+      {data: 'G75_90'},
+      {data: 'stats'}
     ]
   });
 
@@ -31,6 +32,7 @@ $(document).ready(function() {
       const records = [];
       for (let i = 0; i < json.records.length; i++) {
         const record = json.records[i];
+        record.stats = `<a href="charts.html?id=${record.ID}">Stats</a>`;
         const home = getGoalsData(json.records[i].goles_home_total_MARCADOS);
         const away = getGoalsData(json.records[i].goles_away_total_MARCADOS);
         for (let j = 0; j < gColumns.length; j++) {
